@@ -5,18 +5,31 @@ const fs = require("fs");
 let app = express();
 let movies = JSON.parse(fs.readFileSync("./data/movies.json"));
 
+const logger = function(req, res, next){
+    console.log("custom middleware called");
+    next();
+}
+
 app.use(express.json());
+app.use(logger);
+app.use((req, res, next) => {
+    req.requestedAt = new Date().toISOString();
+    next()
+})
+
 
 //ROUTE handler functions
 const getAllMovies = (req,res) => {
     res.status(200).json({
         status: "success",
+        requestedAt : req.requestedAt,
         count: movies.length,
         data: {
             movies: movies
         }
     });
 }
+
 
 const getMovie = (req,res) => {
     console.log(req.params);
@@ -113,15 +126,15 @@ app.route('/api/v1/movies')
     //Route = http method + url
     .get(getAllMovies)
     //POST method
-    .get(creatMovie)
+    .post(creatMovie)
 
 app.route('/api/v1/movies/:id')
     //Get method with id
     .get(getMovie)
     //Modifying the json values using patch
-    .get(updateMovie)
+    .patch(updateMovie)
     //delete request methods
-    .get(deleteMovie)
+    .delete(deleteMovie)
 
 //Create a server
 const port = 3000;
