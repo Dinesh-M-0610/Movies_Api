@@ -2,9 +2,9 @@
   "name": "nodejs-with-express",
   "version": "1.0.0",
   "description": "Learning express",
-  "main": "app.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "npx nodemon server.js"
   },
   "author": "Dinesh",
   "license": "ISC",
