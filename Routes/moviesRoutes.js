@@ -9,7 +9,7 @@ router.route('/')
     //Route = http method + url
     .get(moviesController.getAllMovies)
     //POST method
-    .post(moviesController.creatMovie)
+    .post(moviesController.validateBody, moviesController.createMovie)
 
 router.route('/:id')
     //Get method with id
