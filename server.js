@@ -5,20 +5,18 @@ dotenv.config({path: './config.env'})
 const app = require('./app.js');
 
 // console.log(app.get('env'));
-console.log(process.env);
-
-console.log("MongoDB Connection String:", process.env.CONN_STR);
+// console.log(process.env);
 
 mongoose.connect(process.env.CONN_STR,{
     useNewUrlParser: true
 }).then((conn)=>{
-    console.log(conn);
-    console.log('DB Connection successfull')
+    // console.log(conn);
+    console.log('DB Connection successfull');
+}).catch((error) => {
+    console.log('Some error has occurred');
 })
 
-//Create a server
-const port = process.env.PORT || 3000;
-
-app.listen(port, () =>{
-    console.log("server has started...");
-})
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`🚀 Server started ...`);
+});
