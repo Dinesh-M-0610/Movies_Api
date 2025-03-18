@@ -1,14 +1,37 @@
 const Movie = require('./../Models/movieModel')
 
 //ROUTE handler functions
-exports.getAllMovies = async (req,res) => {
+exports.getAllMovies = async (req, res) => {
     try {
-        const movies = await Movie.find();
-        res.status(200).json({ status: 'success', results: movies.length, data: movies });
+        let queryStr = JSON.stringify(req.query);
+        const queryObj = JSON.parse(queryStr);
+
+        // Remove sort from queryObj so it doesn't interfere with filtering
+        const sortParam = queryObj.sort;
+        delete queryObj.sort;
+
+        let query = Movie.find(queryObj);
+
+        // Apply sorting if sort parameter exists
+        if (sortParam) {
+            query = query.sort(sortParam.split(',').join(' ')); // Support multiple sorting criteria
+        }
+
+        const movies = await query;
+
+        res.status(200).json({
+            status: 'success',
+            results: movies.length,
+            data: movies,
+        });
     } catch (err) {
-        res.status(500).json({ status: 'error', message: err.message });
+        console.error("Error Fetching Movies:", err.message);
+        res.status(500).json({
+            status: 'error',
+            message: err.message,
+        });
     }
-}
+};
 
 exports.getMovie = async (req,res) => {
     try {
