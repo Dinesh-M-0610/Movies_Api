@@ -1,5 +1,12 @@
 const Movie = require('./../Models/movieModel')
 
+exports.getHighestRated = (req,res,next) => {
+    req.query.limit = "5";
+    req.query.sort = '-ratings'
+
+    next();
+}
+
 //ROUTE handler functions
 exports.getAllMovies = async (req, res) => {
     try {
@@ -24,6 +31,7 @@ exports.getAllMovies = async (req, res) => {
             results: movies.length,
             data: movies,
         });
+
     } catch (err) {
         console.error("Error Fetching Movies:", err.message);
         res.status(500).json({
@@ -85,3 +93,72 @@ exports.deleteMovie = async (req, res) => {
         res.status(500).json({ status: 'error', message: err.message });
     }
 }
+
+exports.getMovieStats = async (req,res) => {
+    try{
+        const stats = await Movie.aggregate([
+            {$match : {ratings: {$gte: 4.5}}},
+            {$group: {
+                _id: '$releaseYear',
+                avgRating: { $avg: '$ratings'},
+                avgPrice: { $avg: '$price'},
+                minPrice: { $min: '$price'},
+                maxPrice: { $max: '$price'},
+                priceTotal: { $sum: '$price'},
+                movieCount: { $sum: 1}
+            }},
+            { $sort: { minPrice: 1}},
+            // { $match: {maxPrice: {$gte: 60}}}
+        ]);
+
+        res.status(204).json({ 
+            status: 'success',
+            results: stats.length,
+            data: {
+                stats
+            }
+        });
+    }catch(err) {
+        res.status(404).json({
+            status: 'fail',
+            message: err.message
+        });
+    }
+}
+
+exports.getMovieByGenre = async (req, res) => {
+    try {
+        const genre = req.params.genre;
+
+        let matchStage = {};
+        if (genre) {
+            matchStage = { genres: genre };
+        }
+
+        const movies = await Movie.aggregate([
+            { $unwind: '$genres' },
+            { $match: matchStage },
+            {
+                $group: {
+                    _id: '$genres',
+                    movieCount: { $sum: 1 },
+                    movies: { $push: '$name' },
+                }
+            },
+            { $addFields: { genre: "$_id" } },
+            { $project: { _id: 0 } }
+        ]);
+
+        if (movies.length === 0) {
+            return res.status(404).json({ status: 'fail', message: 'No movies found' });
+        }
+
+        res.status(200).json({
+            status: 'success',
+            results: movies.length,
+            data: movies
+        });
+    } catch (err) {
+        res.status(500).json({ status: 'error', message: err.message });
+    }
+};
