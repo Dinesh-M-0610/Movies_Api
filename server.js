@@ -13,10 +13,19 @@ mongoose.connect(process.env.CONN_STR,{
     // console.log(conn);
     console.log('DB Connection successfull');
 }).catch((error) => {
-    console.log('Some error has occurred');
+    console.log('DB is not getting Connected');
 })
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Server started ...`);
 });
+
+process.on('unhandledRejection',(err) => {
+    console.log(err.name, err.message);
+    console.log("sorry and bye bye");
+    
+    server.close(() => {
+        process.exit(1);
+    })
+})

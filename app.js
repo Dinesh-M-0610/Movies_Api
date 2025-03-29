@@ -1,23 +1,35 @@
 //Import package
 const express = require('express');
-const morgan = require('morgan')
+const morgan = require('morgan');
 
 const moviesRouter = require('./Routes/moviesRoutes');
+
+const CustomError = require('./Utils/CustomError');
+const globalErrorHandler = require('./Controllers/errorController')
 
 let app = express();
 
 app.use(express.json());
 
-if(process.env.NODE_ENV === 'development'){
-    app.use(morgan('dev'));
-}
-
 app.use(express.static('./public'));
-app.use((req, res, next) => {
-    req.requestedAt = new Date().toISOString();
-    next()
+
+app.use('/api/v1/movies', moviesRouter);
+app.use('/api/v1/Users', moviesRouter);
+
+app.all('*', (req,res,next) => {
+    // res.status(404).json({
+    //     status: 'fail',
+    //     message: `Cant find ${req.originalUrl} on the server!`
+    // })
+
+    // const err = new Error(`Cant find ${req.originalUrl} on the server!`);
+    // err.status = 'fail';
+    // err.statusCode = 404;
+
+    const err = new CustomError(`Cant find ${req.originalUrl} on the server!`, 404);
+    next(err);
 });
 
-app.use('/api/v1/movies',moviesRouter);
+app.use(globalErrorHandler);
 
 module.exports = app;
