@@ -19,10 +19,10 @@ router.route('/')
 
 router.route('/:id')
     //Get method with id
-    .get(moviesController.getMovie)
+    .get(authController.protect, moviesController.getMovie)
     //Modifying the json values using patch
     .patch(moviesController.updateMovie)
     //delete request methods
-    .delete(moviesController.deleteMovie)
+    .delete(authController.protect, authController.restrict('admin', 'test1'), moviesController.deleteMovie)
 
 module.exports = router;
