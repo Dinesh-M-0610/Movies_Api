@@ -3,7 +3,8 @@ const express = require('express');
 const morgan = require('morgan');
 
 const moviesRouter = require('./Routes/moviesRoutes');
-const userRouter = require('./Routes/authRouter')
+const authRouter = require('./Routes/authRouter');
+const userRouter = require('./Routes/userRouter');
 
 const CustomError = require('./Utils/CustomError');
 const globalErrorHandler = require('./Controllers/errorController')
@@ -16,6 +17,7 @@ app.use(express.static('./public'));
 
 app.use('/api/v1/movies', moviesRouter);
 app.use('/api/v1/users', authRouter);
+app.use('/api/v1/admin/users', userRouter);
 
 app.all('*', (req,res,next) => {
     // res.status(404).json({
